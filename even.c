@@ -47,7 +47,7 @@ int main() {
               printf("A: %d\n", i);  // Prints the odd interaction
               fflush(stdout);
               write_turn(fp, 'B');  // Writes B to file stream
-              fflock(fileno(fp), LOCK_UN);  // unlock then break
+              flock(fileno(fp), LOCK_UN);  // unlock then break
         break;
          }
          //even
@@ -60,3 +60,4 @@ int main() {
     fclose(fp);
     return 0;
 }
+
