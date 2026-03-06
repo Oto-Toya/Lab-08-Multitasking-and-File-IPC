@@ -3,52 +3,59 @@
 #include <unistd.h>
 #include <sys/file.h>
 
-#define TURN_FILE "/tmp/turn.txt"
+#define TURN_FILE "/tmp/turn.txt"   //IPC File
 
+// Reads and returns char in file stream
 static char read_turn(FILE* fp) {
-    rewind(fp);
-    int c = fgetc(fp);
-    return (c == 'A' || c == 'B') ? (char)c : 'A';
+    rewind(fp);     // Clears buffer
+    int c = fgetc(fp);  // Gets char from file stream
+    return (c == 'A' || c == 'B') ? (char)c : 'A';  // If c is qual to A or B returns char c else returns 'A'
 }
 
+// Writes char to file stream
 static void write_turn(FILE* fp, char t) {
-    rewind(fp);
-    fputc(t, fp);
-    fflush(fp);
-    fsync(fileno(fp));
+    rewind(fp);     // Clears buffer
+    fputc(t, fp);   // Puts char into file stream
+    fflush(fp);     // Force writes to buffer
+    fsync(fileno(fp));  // Forces buffer to stream
 }
 
 int main() {
     int i;
 
-    FILE* fp = fopen(TURN_FILE, "r+");
+    FILE* fp = fopen(TURN_FILE, "r+");  // Opens file for reading and writing
+    // If fp doesnt exsit
     if (!fp) {
-        fp = fopen(TURN_FILE, "w+");
-        if (!fp) { perror("fopen"); return 1; }
+        fp = fopen(TURN_FILE, "w+");    // Opens file for write
+        if (!fp) { perror("fopen"); return 1; } // Error message
         fputc('A', fp);         // A goes first
-        fflush(fp);
-        fsync(fileno(fp));
+        fflush(fp);             // Flushes buffer to the file
+        fsync(fileno(fp));      // Forces OS to write file to disk
     }
 
     for (i = 0; i < 60; i = i + 1) {
-		//stop until signal
-        if ((i & 1) == 0) { // check if i is odd
+        if ((i & 1) == 0) { // check if i is Even
             sleep(1);
             continue;
         }
-        flock(fileno(fp), LOCK_EX);
-        char turn = read_turn(fp);
-        if (turn == 'B') {
-            printf("B: %d\n", i);
-            fflush(stdout);
-            write_turn(fp, 'A');
+        //Odd
+         while (1){
+        flock(fileno(fp), LOCK_EX); // Locks file
+        char turn = read_turn(fp);  // Reads the file
+        if (turn == 'B') {          // If B
+            printf("B: %d\n", i);   // Prints the odd interaction
+            fflush(stdout);         
+            write_turn(fp, 'A');    // Writes A to file stream
+            flock(fileno(fp), LOCK_UN);  // unlock then break
+        break;
         }
-
-        flock(fileno(fp), LOCK_UN);
-
-
-        sleep(1);
+        // odd
+        flock(fileno(fp), LOCK_UN);  // always unlock if odd
+        usleep(10000);               // wait before retrying
     }
-    fclose(fp);
+        sleep(1);   
+    }
+    fclose(fp); // Closes the file when done
+    
 	return 0;
 }
