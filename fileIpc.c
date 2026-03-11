@@ -9,7 +9,8 @@ int main() {
     FILE *id;
     int operation;
     int loop = 1;
-
+    char c;
+    
     pid = fork();
 
     if (pid < 0) {
@@ -22,7 +23,7 @@ int main() {
         int bgLoop = 1;
 
         while (bgLoop == 1) {
-            usleep(500000);   // delay so prints can be seen
+            //usleep(500000);   // delay so prints can be seen
 
             id = fopen("1", "r");
             if (id != NULL) {
@@ -56,7 +57,7 @@ int main() {
 
         return 0;
     }
-
+    
     // PARENT PROCESS = FOREGROUND
     else {
         while (loop == 1) {
@@ -65,6 +66,7 @@ int main() {
 
             if (operation == 1) {
                 id = fopen("1", "w");
+                while((c = getchar()) !=  '\n' && c != EOF);
                 if (id == NULL) {
                     printf("ERROR : File failed to open\n");
                 } else {
@@ -73,6 +75,7 @@ int main() {
             }
             else if (operation == 2) {
                 id = fopen("2", "w");
+                while((c = getchar()) !=  '\n' && c != EOF);
                 if (id == NULL) {
                     printf("ERROR : File failed to open\n");
                 } else {
@@ -81,6 +84,7 @@ int main() {
             }
             else if (operation == 3) {
                 id = fopen("3", "w");
+                while((c = getchar()) !=  '\n' && c != EOF);
                 if (id == NULL) {
                     printf("ERROR : File failed to open\n");
                 } else {
@@ -98,9 +102,11 @@ int main() {
             }
             else {
                 printf("ERROR : Illegal input\n");
-            }
-        }
+                while((c = getchar()) !=  '\n' && c != EOF);
 
+            }
+            operation = 0;
+        }
         wait(NULL);   // wait for child to finish
     }
 
