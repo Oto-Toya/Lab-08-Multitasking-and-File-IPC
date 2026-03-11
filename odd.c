@@ -25,13 +25,11 @@ int main() {
 
     FILE* fp = fopen(TURN_FILE, "r+");  // Opens file for reading and writing
     // If fp doesnt exsit
-    if (!fp) {
-        fp = fopen(TURN_FILE, "w+");    // Opens file for write
-        if (!fp) { perror("fopen"); return 1; } // Error message
-        fputc('A', fp);         // A goes first
-        fflush(fp);             // Flushes buffer to the file
-        fsync(fileno(fp));      // Forces OS to write file to disk
+    while(!fp) {
+        sleep(1);
+        fp = fopen(TURN_FILE, "r+");
     }
+    
 
     for (i = 0; i < 60; i = i + 1) {
         if ((i & 1) == 0) { // check if i is Even
